@@ -1,0 +1,82 @@
+.navbar {
+  background-color: #333;
+  padding: 10px;
+}
+
+.navbar-list {
+  list-style-type: none;
+  display: flex;
+  justify-content: flex-end;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-item {
+  margin: 0 10px;
+}
+
+.navbar-link {
+  text-decoration: none;
+  color: #fff;
+  transition: color 0.3s ease-in-out;
+}
+
+.navbar-link:hover {
+  color: #f0f0f0;
+}
+
+.navbar-logout-btn {
+  background-color: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  transition: color 0.3s ease-in-out;
+}
+
+.navbar-logout-btn:hover {
+  color: #f0f0f0;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .navbar-list {
+    justify-content: center;
+  }
+
+  .navbar-item {
+    margin: 0 5px;
+  }
+}
+
+.expense-form-container {
+  border: 1px solid #ccc;
+  padding: 20px;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  margin-bottom: 20px;
+}
+
+.expense-form-container h2 {
+  margin-top: 0;
+}
+
+.expense-form-container input,
+.expense-form-container select {
+  margin-bottom: 10px;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.expense-form-container button {
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.expense-form-container button:hover {
+  background-color: #0056b3;
+}
