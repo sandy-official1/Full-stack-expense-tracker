@@ -1,14 +1,18 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
+const { v4: uuidv4 } = require("uuid");
 const bcrypt = require("bcrypt");
+const dotenv = require("dotenv");
 const mysql = require("mysql2");
 const cors = require("cors");
+const nodemailer = require("nodemailer");
 const { Sequelize, DataTypes } = require("sequelize");
 
 const User = require("./Models/users");
 const Expense = require("./Models/expense");
 const database = require("./utils/database");
 const Order = require("./Models/orders");
+const ForgotPasswordRequest = require("./Models/forgotPasswordRequest");
 
 const authenticateToken = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
@@ -32,8 +36,12 @@ app.use(express.json());
 app.use(cors());
 
 // Define associations
+User.hasMany(Expense);
+Expense.belongsTo(User);
 Order.belongsTo(User); // Order belongs to a user
 User.hasMany(Order); // User has many orders
+ForgotPasswordRequest.belongsTo(User); // ForgotPasswordRequest belongs to a user
+User.hasMany(ForgotPasswordRequest); // User has many forgot password requests
 
 // Signup API
 app.post("/signup", async (req, res) => {
@@ -250,6 +258,119 @@ app.post("/razorpay-webhook", async (req, res) => {
     res.sendStatus(500);
   }
 });
+
+// Create a transporter object with your SMTP credentials
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: process.env.SMTP_PORT,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USERNAME,
+    pass: process.env.SMTP_PASSWORD,
+  },
+});
+// Route: POST /password/forgotpassword
+app.post("/password/forgotpassword", async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Generate a unique reset token or ID (e.g., using a UUID library)
+    const resetToken = generateResetToken();
+
+    // Create a new entry in the ForgotPasswordRequests table
+    const forgotPasswordRequest = await ForgotPasswordRequest.create({
+      userId: user.id,
+      resetToken,
+      isActive: true,
+    });
+
+    // Compose the email content
+    const mailOptions = {
+      from: "sandeepkumarrana49@gmail.com",
+      to: email,
+      subject: "Password Reset",
+      text: `Click the following link to reset your password: http://localhost:8080/password/resetpassword/${forgotPasswordRequest.resetToken}`,
+    };
+
+    // Send the email
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ message: "Reset password email sent successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+// Route: GET /password/resetpassword/:id
+app.get("/password/resetpassword/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const forgotPasswordRequest = await ForgotPasswordRequest.findByPk(id, {
+      include: User,
+    });
+
+    if (!forgotPasswordRequest || !forgotPasswordRequest.isActive) {
+      return res
+        .status(404)
+        .json({ message: "Invalid or expired reset password request" });
+    }
+
+    res.render("resetpassword", { requestId: forgotPasswordRequest.id });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+// Reset Password API
+app.post("/password/resetpassword/:id", async (req, res) => {
+  const { id } = req.params;
+  const { password } = req.body;
+  try {
+    const forgotPasswordRequest = await ForgotPasswordRequest.findByPk(id, {
+      include: User,
+    });
+
+    if (!forgotPasswordRequest || !forgotPasswordRequest.isActive) {
+      return res.status(404).json({ error: "Invalid or expired reset token" });
+    }
+
+    const user = forgotPasswordRequest.User;
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const hashedPassword = await encryptPassword(password);
+
+    await user.update({ password: hashedPassword });
+
+    // Deactivate the reset token
+    await forgotPasswordRequest.update({ isActive: false });
+
+    res.json({ message: "Password reset successful" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Generate reset token
+const generateResetToken = () => {
+  const resetToken = uuidv4();
+  return resetToken;
+};
+
+// Encrypt password
+const encryptPassword = async (password) => {
+  const hashedPassword = await bcrypt.hash(password, 10);
+  return hashedPassword;
+};
+
 // Protected route example
 app.get("/", authenticateToken, (req, res) => {
   // Access the authenticated user ID using req.user.userId

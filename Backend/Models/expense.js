@@ -1,6 +1,5 @@
 const sequelize = require("../utils/database");
 const { DataTypes } = require("sequelize");
-const User = require("./users"); // Import the User model
 
 const Expense = sequelize.define("expense", {
   id: {
@@ -22,8 +21,5 @@ const Expense = sequelize.define("expense", {
     allowNull: true,
   },
 });
-
-// Establish the association between Expense and User
-Expense.belongsTo(User); // Adds the foreign key UserId to the Expense model
 
 module.exports = Expense;

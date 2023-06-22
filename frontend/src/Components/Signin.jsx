@@ -1,12 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import "./Signin.css";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
-
-
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const Signin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,10 +17,25 @@ const Signin = () => {
       const { token } = response.data;
       localStorage.setItem("token", token);
       navigate("/expenses");
-      toast.success("Login successful 🥹")
+       toast.success("Login successful 🥳");
     } catch (error) {
       console.error(error);
-      toast.error("User not found")
+      toast.error("Invalid email or password");
+    }
+  };
+  const handleForgotPassword = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:8080/password/forgotpassword",
+        {
+          email,
+        }
+      );
+      toast.success("Reset password email sent successfully");
+      // Additional logic (e.g., show a success message)
+    } catch (error) {
+      console.error(error);
+      toast.error("Error sending reset password email");
       // Handle error (e.g., show error message)
     }
   };
@@ -51,8 +62,10 @@ const Signin = () => {
       <button className="signin-button" onClick={handleSignin}>
         Signin
       </button>
+      <div className="forgot-password-link">
+        <button onClick={handleForgotPassword}>Forgot Password?</button>
+      </div>
     </div>
   );
 };
-
 export default Signin;
