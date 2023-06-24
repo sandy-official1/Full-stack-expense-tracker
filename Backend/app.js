@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const { v4: uuidv4 } = require("uuid");
@@ -23,7 +24,7 @@ const authenticateToken = (req, res, next) => {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  jwt.verify(token, "sandybhai", (err, user) => {
+  jwt.verify(token, "process.env.SECRET_KEY", (err, user) => {
     if (err) {
       return res.status(403).json({ error: "Invalid token" });
     }
@@ -62,7 +63,7 @@ app.post("/signup", async (req, res) => {
     });
 
     // Generate a JWT token
-    const token = jwt.sign({ userId: user.id }, "sandybhai");
+    const token = jwt.sign({ userId: user.id }, "process.env.SECRET_KEY");
 
     res.json({ token });
   } catch (error) {
@@ -85,7 +86,7 @@ app.post("/signin", async (req, res) => {
     }
 
     // Generate a JWT token
-    const token = jwt.sign({ userId: user.id }, "sandybhai");
+    const token = jwt.sign({ userId: user.id }, "process.env.SECRET_KEY");
 
     res.json({ token });
   } catch (error) {
@@ -189,7 +190,7 @@ app.delete("/expenses/:id", authenticateToken, async (req, res) => {
 const session = require("express-session");
 app.use(
   session({
-    secret: "sandybhai", //session secret key
+    secret: "sandybhaiii", //session secret key
     resave: false,
     saveUninitialized: true,
     cookie: { secure: false }, // Adjust the secure option based on your environment
