@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import "./App.css";
 
 const UpdateForm = () => {
   const navigate = useNavigate();
@@ -42,7 +45,8 @@ const UpdateForm = () => {
         }
       );
 
-      navigate("/expenses"); // Navigate back to the expenses page
+      navigate("/expenses");
+      toast.success("updated succesfully"); // Navigate back to the expenses page
     } catch (error) {
       console.error(error);
       // Handle error

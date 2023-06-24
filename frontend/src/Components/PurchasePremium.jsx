@@ -1,5 +1,7 @@
- import React, { useEffect } from "react";
+import React, { useEffect } from "react";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const PurchasePremium = () => {
   useEffect(() => {
@@ -12,22 +14,26 @@ const PurchasePremium = () => {
           },
         };
 
-        const response = await axios.post("http://localhost:8080/purchase-premium", null, config);
+        const response = await axios.post(
+          "http://localhost:8080/purchase-premium",
+          null,
+          config
+        );
         const { orderId } = response.data;
 
         const options = {
           key: "rzp_test_YjiHLDNnRzK6x4",
           amount: 10000,
           currency: "INR",
-          name: "Your App Name",
+          name: "Sandybhai",
           description: "Premium Membership",
           order_id: orderId,
           handler: function (response) {
             if (response.razorpay_payment_id) {
-              alert("Transaction successful");
+              toast.success("Transaction successful");
               updateOrderStatus(orderId);
             } else {
-              alert("Transaction failed");
+              toast.error("Transaction failed");
             }
           },
         };
@@ -56,6 +62,9 @@ const PurchasePremium = () => {
         { event: "payment.captured", payload: { order_id: orderId } },
         config
       );
+
+      localStorage.setItem("isPremium", JSON.stringify(true));
+      toast.success("You are a Premium user now 🥳"); // Show a toast notification for premium upgrade
     } catch (error) {
       console.error(error);
     }
@@ -63,6 +72,7 @@ const PurchasePremium = () => {
 
   return (
     <div>
+ 
       <h2>Purchase Premium Membership</h2>
       {/* Add any additional content or styling here */}
     </div>

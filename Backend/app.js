@@ -6,6 +6,8 @@ const dotenv = require("dotenv");
 const mysql = require("mysql2");
 const cors = require("cors");
 const nodemailer = require("nodemailer");
+const Razorpay = require("razorpay");
+
 const { Sequelize, DataTypes } = require("sequelize");
 
 const User = require("./Models/users");
@@ -56,6 +58,7 @@ app.post("/signup", async (req, res) => {
       username,
       email,
       password: hashedPassword,
+      isPremium: false,
     });
 
     // Generate a JWT token
@@ -182,13 +185,23 @@ app.delete("/expenses/:id", authenticateToken, async (req, res) => {
   }
 });
 
-const Razorpay = require("razorpay");
+// Set up session middleware
+const session = require("express-session");
+app.use(
+  session({
+    secret: "sandybhai", //session secret key
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }, // Adjust the secure option based on your environment
+  })
+);
 
 // Initialize Razorpay client
 const razorpay = new Razorpay({
   key_id: "rzp_test_YjiHLDNnRzK6x4",
   key_secret: "zbckQJ7Z1O1Q0kCKfeqAgPRg",
 });
+
 // Handle the purchase request
 app.post("/purchase-premium", authenticateToken, async (req, res) => {
   try {
@@ -213,6 +226,9 @@ app.post("/purchase-premium", authenticateToken, async (req, res) => {
       orderId: razorpayOrder.id, // Update orderId with Razorpay order ID
     });
 
+    // Store the premium status in the session
+    req.session.isPremium = true;
+
     res.json({ orderId: razorpayOrder.id });
   } catch (error) {
     console.error(error);
@@ -235,7 +251,8 @@ app.post("/razorpay-webhook", async (req, res) => {
         // Update the order status to SUCCESSFUL
         await order.update({ status: "SUCCESSFUL" });
 
-        // Make the current user a premium user (You need to implement this logic)
+        // Store the premium status in the session
+        req.session.isPremium = true;
 
         // Send a response back to Razorpay
         res.sendStatus(200);
@@ -257,6 +274,19 @@ app.post("/razorpay-webhook", async (req, res) => {
     console.error(error);
     res.sendStatus(500);
   }
+});
+
+app.get("/check-premium-status", authenticateToken, (req, res) => {
+  const isPremium = req.session.isPremium || false;
+  res.json({ isPremium });
+});
+
+// Handle user logout
+app.post("/logout", (req, res) => {
+  // Clear the premium status from the session
+  req.session.isPremium = false;
+
+  res.sendStatus(200);
 });
 
 // Create a transporter object with your SMTP credentials

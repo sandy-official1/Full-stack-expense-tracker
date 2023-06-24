@@ -30,3 +30,11 @@
 .expenses-table td button + button {
   margin-left: 4px;
 }
+.download-button {
+  background-color: green;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  margin-top: 10px;
+}

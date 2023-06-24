@@ -11,7 +11,6 @@ const User = sequelize.define("user", {
   username: {
     type: DataTypes.STRING,
     allowNull: false,
-
     validate: {
       len: [4, 30],
     },
@@ -19,7 +18,6 @@ const User = sequelize.define("user", {
   email: {
     type: DataTypes.STRING,
     allowNull: false,
-
     validate: {
       isEmail: true,
     },
@@ -30,6 +28,11 @@ const User = sequelize.define("user", {
     validate: {
       len: [8, 500],
     },
+  },
+  isPremium: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
   },
 });
 

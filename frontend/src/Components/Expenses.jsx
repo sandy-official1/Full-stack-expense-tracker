@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./Expenses.css";
 
 const Expenses = () => {
@@ -51,6 +51,29 @@ const Expenses = () => {
     }
   };
 
+  const handleDownloadExpenses = () => {
+    const filename = "expenses.csv";
+    const csvData = convertToCSV(expenses);
+    const blob = new Blob([csvData], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const convertToCSV = (data) => {
+    const headers = Object.keys(data[0]).join(",");
+    const rows = data.map((expense) =>
+      Object.values(expense)
+        .map((value) => `"${value}"`)
+        .join(",")
+    );
+    return [headers, ...rows].join("\n");
+  };
+
   return (
     <div className="expenses-container">
       <h2>Expenses</h2>
@@ -81,7 +104,10 @@ const Expenses = () => {
           ))}
         </tbody>
       </table>
-      <ToastContainer />
+      <button className="download-button" onClick={handleDownloadExpenses}>
+        Download Expenses
+      </button>
+     
     </div>
   );
 };
