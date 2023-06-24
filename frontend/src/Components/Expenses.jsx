@@ -7,6 +7,8 @@ import "./Expenses.css";
 
 const Expenses = () => {
   const [expenses, setExpenses] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const navigate = useNavigate(); // Hook for navigation
 
   const fetchExpenses = async () => {
@@ -17,7 +19,11 @@ const Expenses = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setExpenses(response.data);
+      const totalExpenses = response.data;
+      setTotalPages(Math.ceil(totalExpenses.length / 10));
+      const startIdx = (currentPage - 1) * 10;
+      const endIdx = startIdx + 10;
+      setExpenses(totalExpenses.slice(startIdx, endIdx));
     } catch (error) {
       console.error(error);
       // Handle error
@@ -26,7 +32,7 @@ const Expenses = () => {
 
   useEffect(() => {
     fetchExpenses();
-  }, []);
+  }, [currentPage]);
 
   const handleUpdateExpense = (id) => {
     const expenseToUpdate = expenses.find((expense) => expense.id === id);
@@ -74,6 +80,22 @@ const Expenses = () => {
     return [headers, ...rows].join("\n");
   };
 
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleLastPage = () => {
+    setCurrentPage(totalPages);
+  };
+
   return (
     <div className="expenses-container">
       <h2>Expenses</h2>
@@ -104,10 +126,20 @@ const Expenses = () => {
           ))}
         </tbody>
       </table>
+      <div className="pagination">
+        <button onClick={handlePrevPage} disabled={currentPage === 1}>
+          Prev
+        </button>
+        <span>{`Page ${currentPage} of ${totalPages}`}</span>
+        <button onClick={handleNextPage} disabled={currentPage === totalPages}>
+          Next
+        </button>
+        <button onClick={handleLastPage}>Last Page</button>
+      </div>
       <button className="download-button" onClick={handleDownloadExpenses}>
         Download Expenses
       </button>
-     
+    
     </div>
   );
 };

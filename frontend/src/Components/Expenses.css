@@ -38,3 +38,14 @@
   border-radius: 4px;
   margin-top: 10px;
 }
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination button {
+  padding: 5px 10px;
+  margin: 0 5px;
+}
