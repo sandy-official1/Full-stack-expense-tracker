@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
@@ -13,26 +13,25 @@ const Navbar = () => {
     checkPremiumStatus();
   }, []);
 
-  const checkPremiumStatus = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
+ const checkPremiumStatus = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
 
-      // Send a request to the server to check the premium status
-      const response = await axios.get("http://localhost:8080/check-premium-status", config);
+    const response = await axios.get("http://localhost:8080/check-premium-status", config);
+    const { isPremium } = response.data;
 
-      const { isPremium } = response.data;
+    setIsPremium(isPremium || false); // Update the local state with the premium status
 
-      // Update the local state with the premium status
-      setIsPremium(isPremium || false);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    localStorage.setItem("isPremium", isPremium); // Store the premium status in the local storage
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   const handleLogout = async () => {
     try {

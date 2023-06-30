@@ -80,3 +80,11 @@
 .expense-form-container button:hover {
   background-color: #0056b3;
 }
+.logo {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  float: left;
+  margin-top: -9px;
+  margin-left: 10px;
+}

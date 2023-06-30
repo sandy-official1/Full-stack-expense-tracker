@@ -45,7 +45,7 @@ Order.belongsTo(User); // Order belongs to a user
 User.hasMany(Order); // User has many orders
 ForgotPasswordRequest.belongsTo(User); // ForgotPasswordRequest belongs to a user
 User.hasMany(ForgotPasswordRequest); // User has many forgot password requests
-
+//actually it is one to one relationship but if where a user can have multiple accounts associated with different email addresses or usernames.then it one to many
 // Signup API
 app.post("/signup", async (req, res) => {
   try {
